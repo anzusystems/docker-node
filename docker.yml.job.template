@@ -1,0 +1,26 @@
+  ${GITHUB_JOB_ID}:
+    name: Build and push ${NODE_VERSION_TAG} ${VARIANT} image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./${BUILD_DIR}
+          file: ./${BUILD_DIR}/Dockerfile
+          cache-from: type=gha,scope=${VARIANT_TAG}
+          cache-to: type=gha,scope=${VARIANT_TAG},mode=max
+          push: true
+          tags: anzusystems/node:${{ github.ref_name }}-${VARIANT_TAG},anzusystems/node:latest-${VARIANT_TAG}
+
