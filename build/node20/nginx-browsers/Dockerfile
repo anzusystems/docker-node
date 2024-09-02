@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY!
 # CHECK README FOR MORE INFO.
 #
-FROM node:20.12.2
+FROM node:20.17.0
 
 LABEL maintainer="Lubomir Stanko <lubomir.stanko@petitpress.sk>"
 
@@ -16,6 +16,7 @@ ENV CONFIG_OWNER_NAME=node \
     CONFIG_GROUP_NAME=node \
     CONTAINER_STOP_LOG_FILE="/var/www/html/var/log/container_stop.log" \
     COREPACK_HOME="/usr/lib/node/corepack" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     MAIN_TERMINATED_FILE="/var/www/html/var/log/main-terminated" \
     NPM_CONFIG_LOGLEVEL=notice \
     YARN_CACHE_FOLDER="/var/cache/yarn" \
@@ -43,9 +44,10 @@ ENV RUN_DEPS="ca-certificates \
 # PACKAGES
 # ----------------------------------------------------------------------------------------------------------------------
 RUN apt-get update && \
+    APT_SUPERVISOR_VERSION=$(apt-cache madison supervisor | awk -v ver="4.2.5" '$3 ~ ver {print $3; exit}') && \
     apt-get install -y \
         ${RUN_DEPS} \
-        supervisor=4.2.5-1 && \
+        supervisor=${APT_SUPERVISOR_VERSION} && \
 # Cleanup
     apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
@@ -54,18 +56,14 @@ RUN apt-get update && \
 # NPM
 # Install static npm version
 # ----------------------------------------------------------------------------------------------------------------------
-RUN npm install --location=global npm@10.5.2 && \
-    npm install --location=global auditjs@4.0.45 && \
+RUN npm install --location=global npm@latest && \
+    npm install --location=global auditjs@latest && \
     mkdir -p ${COREPACK_HOME} && \
-    corepack prepare yarn@4.1.1 --activate && \
+    corepack prepare yarn@stable --activate && \
     corepack enable && \
 # Node cache cleanup
     npm cache clean --force && \
     yarn cache clean --all
-# Versions of local tools
-RUN echo "node version: $(node -v) \n" \
-         "npm version:  $(npm -v) \n" \
-         "yarn version: $(yarn -v)"
 
 # ----------------------------------------------------------------------------------------------------------------------
 # USER SETUP
@@ -121,6 +119,7 @@ ENV NGINX_ACCESS_LOG="/var/log/nginx/access.log main" \
     NGINX_WORKER_RLIMIT_NOFILE=65535 \
     NGINX_X_CONTENT_TYPE_OPTIONS="nosniff" \
     NGINX_X_XSS_PROTECTION="1; mode=block"
+
 # ----------------------------------------------------------------------------------------------------------------------
 # NGINX
 RUN DEBIAN_FRONTEND=noninteractive && \
@@ -129,12 +128,17 @@ RUN DEBIAN_FRONTEND=noninteractive && \
     curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o ${NGINX_KEYRING} && \
     echo "deb [signed-by=${NGINX_KEYRING}] http://nginx.org/packages/debian ${NGINX_REPO}" > /etc/apt/sources.list.d/nginx.list && \
     apt-get update && \
+    APT_NGINX_VERSION=$(apt-cache madison nginx | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_GEOIP_VERSION=$(apt-cache madison nginx-module-geoip | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_IMAGE_FILTER_VERSION=$(apt-cache madison nginx-module-image-filter | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_NJS_VERSION=$(apt-cache madison nginx-module-njs | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_XSLT_VERSION=$(apt-cache madison nginx-module-xslt | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
     apt-get install --no-install-recommends --no-install-suggests -y \
-        nginx=1.24.0-1~bookworm \
-        nginx-module-xslt=1.24.0-1~bookworm \
-        nginx-module-geoip=1.24.0-1~bookworm \
-        nginx-module-image-filter=1.24.0-1~bookworm \
-        nginx-module-njs=1.24.0+0.8.3-1~bookworm && \
+        nginx=${APT_NGINX_VERSION} \
+        nginx-module-geoip=${APT_NGINX_MODULE_GEOIP_VERSION} \
+        nginx-module-image-filter=${APT_NGINX_MODULE_IMAGE_FILTER_VERSION} \
+        nginx-module-njs=${APT_NGINX_MODULE_NJS_VERSION} \
+        nginx-module-xslt=${APT_NGINX_MODULE_XSLT_VERSION} && \
 # Cleanup
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -183,7 +187,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
 # Install Google Chrome
-RUN wget -q -O /usr/src/google-chrome-stable_current_amd64.deb "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_124.0.6367.60-1_amd64.deb" && \
+RUN wget -q -O /usr/src/google-chrome-stable_current_amd64.deb "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_128.0.6613.113-1_amd64.deb" && \
     apt-get update && \
     dpkg -i /usr/src/google-chrome-stable_current_amd64.deb ; \
     apt-get install -f -y && \
@@ -192,7 +196,7 @@ RUN wget -q -O /usr/src/google-chrome-stable_current_amd64.deb "https://dl.googl
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
 # Install Firefox
-RUN wget -q -O /tmp/firefox.tar.bz2 "https://download-installer.cdn.mozilla.net/pub/firefox/releases/125.0.1/linux-x86_64/en-US/firefox-125.0.1.tar.bz2" && \
+RUN wget -q -O /tmp/firefox.tar.bz2 "https://download-installer.cdn.mozilla.net/pub/firefox/releases/129.0.2/linux-x86_64/en-US/firefox-129.0.2.tar.bz2" && \
     tar -C /opt -xjf /tmp/firefox.tar.bz2 && \
     rm -f /tmp/firefox.tar.bz2 && \
     ln -fs /opt/firefox/firefox /usr/bin/firefox

@@ -10,6 +10,7 @@ ENV CONFIG_OWNER_NAME=node \
     CONFIG_GROUP_NAME=node \
     CONTAINER_STOP_LOG_FILE="/var/www/html/var/log/container_stop.log" \
     COREPACK_HOME="/usr/lib/node/corepack" \
+    COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
     MAIN_TERMINATED_FILE="/var/www/html/var/log/main-terminated" \
     NPM_CONFIG_LOGLEVEL=notice \
     YARN_CACHE_FOLDER="/var/cache/yarn" \
@@ -37,9 +38,10 @@ ENV RUN_DEPS="ca-certificates \
 # PACKAGES
 # ----------------------------------------------------------------------------------------------------------------------
 RUN apt-get update && \
+    APT_SUPERVISOR_VERSION=$(apt-cache madison supervisor | awk -v ver="${SUPERVISOR_VERSION}" '$3 ~ ver {print $3; exit}') && \
     apt-get install -y \
         ${RUN_DEPS} \
-        supervisor=${SUPERVISOR_VERSION}-${SUPERVISOR_PKG_RELEASE} && \
+        supervisor=${APT_SUPERVISOR_VERSION} && \
 # Cleanup
     apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
@@ -48,18 +50,14 @@ RUN apt-get update && \
 # NPM
 # Install static npm version
 # ----------------------------------------------------------------------------------------------------------------------
-RUN npm install --location=global npm@${NPM_VERSION} && \
-    npm install --location=global auditjs@${AUDITJS_VERSION} && \
+RUN npm install --location=global npm@latest && \
+    npm install --location=global auditjs@latest && \
     mkdir -p ${COREPACK_HOME} && \
-    corepack prepare yarn@${YARN_VERSION} --activate && \
+    corepack prepare yarn@stable --activate && \
     corepack enable && \
 # Node cache cleanup
     npm cache clean --force && \
     yarn cache clean --all
-# Versions of local tools
-RUN echo "node version: $(node -v) \n" \
-         "npm version:  $(npm -v) \n" \
-         "yarn version: $(yarn -v)"
 
 # ----------------------------------------------------------------------------------------------------------------------
 # USER SETUP
