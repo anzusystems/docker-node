@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY!
 # CHECK README FOR MORE INFO.
 #
-FROM node:20.17.0
+FROM node:20.18.1
 
 LABEL maintainer="Lubomir Stanko <lubomir.stanko@petitpress.sk>"
 
