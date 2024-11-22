@@ -13,6 +13,7 @@ TMP_FINAL_DOCKERFILE_FILE="/tmp/node_tmp_final_variant_Dockerfile"
 declare -A VERSION_LIST
 VERSION_LIST=(
     [20]="${NODE20_VERSION}"
+    [22]="${NODE22_VERSION}"
 )
 
 VARIANTS_LIST='base nginx nginx-browsers'

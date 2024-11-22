@@ -1,0 +1,58 @@
+map $status $static_cache_control_header {
+    404     "no-cache, no-store, must-revalidate";
+    default "${NGINX_STATIC_CACHE_CONTROL_HEADER}";
+}
+
+server {
+    listen ${NGINX_PORT};
+
+    root ${NGINX_ROOT};
+    index index.html;
+    client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
+    large_client_header_buffers 4 ${NGINX_LARGE_CLIENT_HEADER_BUFFERS_SIZE};
+
+    #App paths
+    location / {
+        try_files $uri $uri/ @rewrites;
+    }
+
+    location @rewrites {
+        rewrite ^(.+)$ /index.html last;
+    }
+
+    location ~* \.html?$ {
+        expires -1;
+        add_header Pragma "no-cache";
+        add_header Cache-Control "no-store, must-revalidate";
+        add_header Host $host;
+
+        # Custom nginx response headers
+        add_header 'X-Robots-Tag' '${NGINX_HTML_X_ROBOTS_TAG}' always;
+        add_header 'X-XSS-Protection' '${NGINX_X_XSS_PROTECTION}' always;
+        add_header 'X-Content-Type-Options' '${NGINX_X_CONTENT_TYPE_OPTIONS}' always;
+    }
+
+    location ~* ^[^\?\&]+\.(json|zip|tgz|gz|rar|bz2|doc|xls|pdf|ppt|txt|tar|rtf|mid|midi|wav)$ {
+        add_header Host $host;
+
+        # Custom nginx response headers
+        add_header 'X-Robots-Tag' '${NGINX_DOCUMENTS_X_ROBOTS_TAG}' always;
+        add_header 'X-XSS-Protection' '${NGINX_X_XSS_PROTECTION}' always;
+        add_header 'X-Content-Type-Options' '${NGINX_X_CONTENT_TYPE_OPTIONS}' always;
+    }
+
+    location ~* ^[^\?\&]+\.(jpg|jpeg|gif|png|ico|css|js|svg|bmp|eot|woff|woff2|ttf)$ {
+        add_header Host $host;
+        add_header Cache-Control $static_cache_control_header always;
+        add_header X-Cache-Control-TTL ${NGINX_STATIC_X_CACHE_CONTROL_TTL_HEADER};
+
+        # Custom nginx response headers
+        add_header 'X-Robots-Tag' '${NGINX_STATIC_X_ROBOTS_TAG}' always;
+        add_header 'X-XSS-Protection' '${NGINX_X_XSS_PROTECTION}' always;
+        add_header 'X-Content-Type-Options' '${NGINX_X_CONTENT_TYPE_OPTIONS}' always;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
