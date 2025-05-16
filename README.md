@@ -10,6 +10,7 @@ Additionally, it contains [nginx](https://nginx.org/), [mariadb client](https://
 
 - Node 20
 - Node 22
+- Node 24
 - NPM
 - Yarn
 - AuditJS

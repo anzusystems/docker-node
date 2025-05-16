@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY!
 # CHECK README FOR MORE INFO.
 #
-FROM node:20.19.2-bookworm-slim
+FROM node:24.0.2-bookworm-slim
 
 LABEL maintainer="Lubomir Stanko <lubomir.stanko@petitpress.sk>"
 

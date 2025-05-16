@@ -14,6 +14,7 @@ declare -A VERSION_LIST
 VERSION_LIST=(
     [20]="${NODE20_VERSION}"
     [22]="${NODE22_VERSION}"
+    [24]="${NODE24_VERSION}"
 )
 
 VARIANTS_LIST='base nginx nginx-browsers'

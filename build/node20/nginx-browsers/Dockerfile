@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY!
 # CHECK README FOR MORE INFO.
 #
-FROM node:20.18.1-bookworm-slim
+FROM node:20.19.2-bookworm-slim
 
 LABEL maintainer="Lubomir Stanko <lubomir.stanko@petitpress.sk>"
 
@@ -128,11 +128,11 @@ RUN DEBIAN_FRONTEND=noninteractive && \
     curl -fsSL https://nginx.org/keys/nginx_signing.key | gpg --dearmor -o ${NGINX_KEYRING} && \
     echo "deb [signed-by=${NGINX_KEYRING}] http://nginx.org/packages/debian ${NGINX_REPO}" > /etc/apt/sources.list.d/nginx.list && \
     apt-get update && \
-    APT_NGINX_VERSION=$(apt-cache madison nginx | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
-    APT_NGINX_MODULE_GEOIP_VERSION=$(apt-cache madison nginx-module-geoip | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
-    APT_NGINX_MODULE_IMAGE_FILTER_VERSION=$(apt-cache madison nginx-module-image-filter | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
-    APT_NGINX_MODULE_NJS_VERSION=$(apt-cache madison nginx-module-njs | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
-    APT_NGINX_MODULE_XSLT_VERSION=$(apt-cache madison nginx-module-xslt | awk -v ver="1.26.2" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_VERSION=$(apt-cache madison nginx | awk -v ver="1.28.0" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_GEOIP_VERSION=$(apt-cache madison nginx-module-geoip | awk -v ver="1.28.0" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_IMAGE_FILTER_VERSION=$(apt-cache madison nginx-module-image-filter | awk -v ver="1.28.0" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_NJS_VERSION=$(apt-cache madison nginx-module-njs | awk -v ver="1.28.0" '$3 ~ ver {print $3; exit}') && \
+    APT_NGINX_MODULE_XSLT_VERSION=$(apt-cache madison nginx-module-xslt | awk -v ver="1.28.0" '$3 ~ ver {print $3; exit}') && \
     apt-get install --no-install-recommends --no-install-suggests -y \
         nginx=${APT_NGINX_VERSION} \
         nginx-module-geoip=${APT_NGINX_MODULE_GEOIP_VERSION} \
@@ -182,12 +182,13 @@ RUN apt-get update && \
         libxtst6 \
         xauth \
         xdg-utils \
-        xvfb && \
+        xvfb \
+        xz-utils && \
 # Cleanup
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
 # Install Google Chrome
-RUN wget -q -O /usr/src/google-chrome-stable_current_amd64.deb "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_131.0.6778.85-1_amd64.deb" && \
+RUN wget -q -O /usr/src/google-chrome-stable_current_amd64.deb "https://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_136.0.7103.113-1_amd64.deb" && \
     apt-get update && \
     dpkg -i /usr/src/google-chrome-stable_current_amd64.deb ; \
     apt-get install -f -y && \
@@ -196,10 +197,11 @@ RUN wget -q -O /usr/src/google-chrome-stable_current_amd64.deb "https://dl.googl
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
 # Install Firefox
-RUN wget -q -O /tmp/firefox.tar.bz2 "https://download-installer.cdn.mozilla.net/pub/firefox/releases/132.0.2/linux-x86_64/en-US/firefox-132.0.2.tar.bz2" && \
-    tar -C /opt -xjf /tmp/firefox.tar.bz2 && \
-    rm -f /tmp/firefox.tar.bz2 && \
-    ln -fs /opt/firefox/firefox /usr/bin/firefox
+RUN wget -q -O /tmp/firefox.tar.xz "https://download-installer.cdn.mozilla.net/pub/firefox/releases/138.0.3/linux-x86_64/en-US/firefox-138.0.3.tar.xz" && \
+    tar -C /opt -xJf /tmp/firefox.tar.xz && \
+    ln -fs /opt/firefox/firefox /usr/bin/firefox && \
+# Cleanup
+    rm -f /tmp/firefox.tar.xz
 # Versions of local tools
 RUN echo "node version:    $(node -v) \n" \
          "npm version:     $(npm -v) \n" \

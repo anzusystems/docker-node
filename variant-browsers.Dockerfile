@@ -23,7 +23,8 @@ RUN apt-get update && \
         libxtst6 \
         xauth \
         xdg-utils \
-        xvfb && \
+        xvfb \
+        xz-utils && \
 # Cleanup
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
@@ -37,10 +38,11 @@ RUN wget -q -O /usr/src/google-chrome-stable_current_amd64.deb "https://dl.googl
     apt-get clean && \
     rm -r /var/lib/apt/lists/*
 # Install Firefox
-RUN wget -q -O /tmp/firefox.tar.bz2 "https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2" && \
-    tar -C /opt -xjf /tmp/firefox.tar.bz2 && \
-    rm -f /tmp/firefox.tar.bz2 && \
-    ln -fs /opt/firefox/firefox /usr/bin/firefox
+RUN wget -q -O /tmp/firefox.tar.xz "https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.xz" && \
+    tar -C /opt -xJf /tmp/firefox.tar.xz && \
+    ln -fs /opt/firefox/firefox /usr/bin/firefox && \
+# Cleanup
+    rm -f /tmp/firefox.tar.xz
 # Versions of local tools
 RUN echo "node version:    $(node -v) \n" \
          "npm version:     $(npm -v) \n" \
