@@ -12,7 +12,6 @@ RUN apt-get update && \
         libasound2 \
         libgbm-dev \
         libgbm1 \
-        libgconf-2-4 \
         libgtk-3-0 \
         libgtk2.0-0 \
         libnotify-dev \

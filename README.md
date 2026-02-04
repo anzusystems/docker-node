@@ -8,7 +8,6 @@ Additionally, it contains [nginx](https://nginx.org/), [mariadb client](https://
 
 ## What's inside
 
-- Node 20
 - Node 22
 - Node 24
 - NPM

@@ -1,4 +1,4 @@
-FROM node:${NODE_VERSION}-bookworm-slim
+FROM node:${NODE_VERSION}-${DEBIAN_RELEASE}-slim
 
 LABEL maintainer="Lubomir Stanko <lubomir.stanko@petitpress.sk>"
 

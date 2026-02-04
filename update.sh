@@ -9,10 +9,10 @@ DEFAULT_IFS=${IFS}
 TEMPLATE_DOCKERFILE=template.Dockerfile
 TMP_DOCKERFILE_FILE="/tmp/node_tmp_variant_Dockerfile"
 TMP_FINAL_DOCKERFILE_FILE="/tmp/node_tmp_final_variant_Dockerfile"
+DEBIAN_RELEASE="trixie"
 
 declare -A VERSION_LIST
 VERSION_LIST=(
-    [20]="${NODE20_VERSION}"
     [22]="${NODE22_VERSION}"
     [24]="${NODE24_VERSION}"
 )
@@ -20,7 +20,7 @@ VERSION_LIST=(
 VARIANTS_LIST='base nginx nginx-browsers'
 
 # Get all parameter names to replace in Dockerfile
-REPLACE_PARAMETERS=$(sed <versions.conf -e '/^#/d' -e '/^$/d' -e 's/export \(.*\)=.*/$\1/g' | tr '\n' ':'):\$NODE_VERSION
+REPLACE_PARAMETERS=$(sed <versions.conf -e '/^#/d' -e '/^$/d' -e 's/export \(.*\)=.*/$\1/g' | tr '\n' ':'):\$NODE_VERSION:\$DEBIAN_RELEASE
 
 rm -rf build
 
@@ -55,6 +55,7 @@ for version in "${VERSION_TAGS[@]}"; do
         done
         IFS=${DEFAULT_IFS}
         # Variables
+        export DEBIAN_RELEASE
         export NODE_VERSION_TAG
         export NODE_VERSION
         export VARIANT
