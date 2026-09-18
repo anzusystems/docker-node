@@ -4,7 +4,7 @@
 # PLEASE DO NOT EDIT IT DIRECTLY!
 # CHECK README FOR MORE INFO.
 #
-FROM node:24.13.0-trixie-slim
+FROM node:24.21.0-trixie-slim
 
 LABEL maintainer="Lubomir Stanko <lubomir.stanko@petitpress.sk>"
 
